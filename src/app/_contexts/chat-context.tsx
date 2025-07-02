@@ -241,7 +241,7 @@ export function ChatProvider({
       if (initialMessages.length === 0 && !hasInvalidated) {
         setHasInvalidated(true);
         void utils.chats.getChats.invalidate({
-          workbenchId: workbench?.id,
+          workbenchId: workbench?.id ?? null,
         });
       }
     },

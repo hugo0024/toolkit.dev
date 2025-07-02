@@ -1,26 +1,32 @@
 {
-  description = "T3 Stack Development Environment";
-  
+  description = "Run 'nix develop' to have a dev shell that has everything this project needs";
+
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs";
+    flake-utils.url = "github:numtide/flake-utils";
   };
-  
-  outputs = { self, nixpkgs, ... }:
-    let
-      system = "x86_64-linux";
-      pkgs = nixpkgs.legacyPackages.${system};
-    in {
-      devShells.x86_64-linux.default = with pkgs; mkShell {
-        buildInputs = [
-          nodejs_20
-          yarn
-          # Add other dependencies as needed
-        ];
-        
-        shellHook = ''
-          echo "Node.js version: $(node --version)"
-          echo "Yarn version: $(yarn --version)"
-        '';
-      };
-    };
+
+  outputs = { self, nixpkgs, flake-utils }:
+    flake-utils.lib.eachDefaultSystem (system:
+      let
+        pkgs = nixpkgs.legacyPackages.${system};
+      in
+      {
+        devShell = pkgs.mkShell {
+          buildInputs = with pkgs; [
+            nodejs_20
+            nodePackages_latest.pnpm
+            nodePackages_latest.vercel
+            nodePackages_latest.prisma
+            postgresql_15
+            openssl
+          ];
+          
+          env = {
+            PRISMA_QUERY_ENGINE_LIBRARY = "${pkgs.prisma-engines}/lib/libquery_engine.node";
+            PRISMA_QUERY_ENGINE_BINARY = "${pkgs.prisma-engines}/bin/query-engine";
+            PRISMA_SCHEMA_ENGINE_BINARY = "${pkgs.prisma-engines}/bin/schema-engine";
+          };
+        };
+      });
 }
