@@ -8,6 +8,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
+import {
   TooltipContent,
   TooltipTrigger,
   Tooltip,
@@ -23,11 +30,13 @@ import { toast } from "sonner";
 import { ToolkitIcons } from "@/components/toolkit/toolkit-icons";
 import { clientToolkits } from "@/toolkits/toolkits/client";
 import { LanguageModelCapability } from "@/ai/types";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const ToolsSelect = () => {
   const { toolkits, addToolkit, removeToolkit, workbench, selectedChatModel } =
     useChatContext();
   const searchParams = useSearchParams();
+  const isMobile = useIsMobile();
 
   const [isOpen, setIsOpen] = useState(
     Object.keys(clientToolkits).some((toolkit) => searchParams.get(toolkit)),
@@ -64,6 +73,41 @@ export const ToolsSelect = () => {
     }
   };
 
+  const TriggerButton = (
+    <Button
+      variant={"outline"}
+      className="w-fit justify-start bg-transparent md:w-auto md:px-2"
+      disabled={
+        !selectedChatModel?.capabilities?.includes(
+          LanguageModelCapability.ToolCalling,
+        )
+      }
+    >
+      {toolkits.length > 0 ? (
+        <ToolkitIcons toolkits={toolkits.map((toolkit) => toolkit.id)} />
+      ) : (
+        <Wrench />
+      )}
+      <span className="hidden md:block">
+        {toolkits.length > 0
+          ? `${toolkits.length} Toolkit${toolkits.length > 1 ? "s" : ""}`
+          : "Add Toolkits"}
+      </span>
+    </Button>
+  );
+
+  const SaveButton = workbench !== undefined && (
+    <Button
+      variant={"outline"}
+      className="bg-transparent"
+      onClick={handleSave}
+      disabled={isPending}
+    >
+      {isPending ? <Loader2 className="animate-spin" /> : <Save />}
+      Save
+    </Button>
+  );
+
   if (
     selectedChatModel &&
     !selectedChatModel.capabilities?.includes(
@@ -90,10 +134,10 @@ export const ToolsSelect = () => {
     );
   }
 
-  return (
-    <TooltipProvider>
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogTrigger asChild>
+  if (isMobile) {
+    return (
+      <TooltipProvider>
+        <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <Button
             variant={"outline"}
             className="w-fit justify-start bg-transparent md:w-auto md:px-2"
@@ -102,6 +146,7 @@ export const ToolsSelect = () => {
                 LanguageModelCapability.ToolCalling,
               )
             }
+            onClick={() => setIsOpen(true)}
           >
             {toolkits.length > 0 ? (
               <ToolkitIcons toolkits={toolkits.map((toolkit) => toolkit.id)} />
@@ -114,6 +159,38 @@ export const ToolsSelect = () => {
                 : "Add Toolkits"}
             </span>
           </Button>
+
+          <SheetContent side="bottom" className="h-[90vh] p-0 flex flex-col">
+            <SheetHeader className="p-4 border-b flex-shrink-0">
+              <SheetTitle>Manage Toolkits</SheetTitle>
+              <SheetDescription>
+                Add or remove tools to enhance your chat experience
+              </SheetDescription>
+            </SheetHeader>
+            <div className="flex-1 overflow-y-auto p-4">
+              <ToolkitList
+                selectedToolkits={toolkits}
+                onAddToolkit={addToolkit}
+                onRemoveToolkit={removeToolkit}
+                isMobile={isMobile}
+              />
+            </div>
+            {SaveButton && (
+              <div className="flex-shrink-0 p-4 border-t">
+                {SaveButton}
+              </div>
+            )}
+          </SheetContent>
+        </Sheet>
+      </TooltipProvider>
+    );
+  }
+
+  return (
+    <TooltipProvider>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogTrigger asChild>
+          {TriggerButton}
         </DialogTrigger>
 
         <DialogContent className="flex max-h-[80vh] w-full max-w-2xl flex-col gap-4 overflow-hidden">
@@ -130,17 +207,7 @@ export const ToolsSelect = () => {
               onRemoveToolkit={removeToolkit}
             />
           </div>
-          {workbench !== undefined && (
-            <Button
-              variant={"outline"}
-              className="bg-transparent"
-              onClick={handleSave}
-              disabled={isPending}
-            >
-              {isPending ? <Loader2 className="animate-spin" /> : <Save />}
-              Save
-            </Button>
-          )}
+          {SaveButton}
         </DialogContent>
       </Dialog>
     </TooltipProvider>

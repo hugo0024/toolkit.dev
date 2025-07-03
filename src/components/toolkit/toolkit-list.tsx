@@ -5,6 +5,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -19,18 +26,21 @@ import { ClientToolkitConfigure } from "@/components/toolkit/toolkit-configure";
 import type { SelectedToolkit } from "./types";
 import { toolkitGroups } from "@/toolkits/toolkit-groups";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
 
 interface ToolkitListProps {
   selectedToolkits: SelectedToolkit[];
   onAddToolkit: (toolkit: SelectedToolkit) => void;
   onRemoveToolkit: (id: Toolkits) => void;
+  isMobile?: boolean;
 }
 
 export const ToolkitList: React.FC<ToolkitListProps> = ({
   selectedToolkits,
   onAddToolkit,
   onRemoveToolkit,
+  isMobile = false,
 }) => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -58,13 +68,15 @@ export const ToolkitList: React.FC<ToolkitListProps> = ({
 
   return (
     <TooltipProvider>
-      <VStack className="w-full items-start gap-4">
+      <VStack className={cn("w-full items-start", isMobile ? "gap-6" : "gap-4")}>
         {toolkitGroups.map((group) => {
           return (
             <VStack key={group.id} className="w-full items-start">
-              <HStack className="gap-2">
-                <group.icon className="size-4" />
-                <h3 className="font-bold">{group.name}</h3>
+              <HStack className={cn("gap-2", isMobile && "mb-2")}>
+                <group.icon className={cn(isMobile ? "size-5" : "size-4")} />
+                <h3 className={cn("font-bold", isMobile ? "text-base" : "text-sm")}>
+                  {group.name}
+                </h3>
               </HStack>
               <div className="bg-muted/50 w-full rounded-md border">
                 {Object.entries(clientToolkits)
@@ -78,6 +90,7 @@ export const ToolkitList: React.FC<ToolkitListProps> = ({
                         selectedToolkits={selectedToolkits}
                         onAddToolkit={onAddToolkit}
                         onRemoveToolkit={onRemoveToolkit}
+                        isMobile={isMobile}
                       />
                     );
                   })}
@@ -96,6 +109,7 @@ interface ToolkitItemProps {
   selectedToolkits: SelectedToolkit[];
   onAddToolkit: (toolkit: SelectedToolkit) => void;
   onRemoveToolkit: (id: Toolkits) => void;
+  isMobile?: boolean;
 }
 
 const ToolkitItem = ({
@@ -104,13 +118,20 @@ const ToolkitItem = ({
   selectedToolkits,
   onAddToolkit,
   onRemoveToolkit,
+  isMobile = false,
 }: ToolkitItemProps) => {
+  const [configSheetOpen, setConfigSheetOpen] = useState(false);
   const isSelected = selectedToolkits.some((t) => t.id === id);
   const needsConfiguration = Object.keys(toolkit.parameters.shape).length > 0;
 
+  const handleConfigurationComplete = (toolkitToAdd: SelectedToolkit) => {
+    onAddToolkit(toolkitToAdd);
+    setConfigSheetOpen(false);
+  };
+
   const addToolkitButtons = isSelected ? (
     <Button
-      size="sm"
+      size={isMobile ? "default" : "sm"}
       onClick={() => onRemoveToolkit(id)}
       className="user-message"
       type="button"
@@ -118,31 +139,64 @@ const ToolkitItem = ({
       Active
     </Button>
   ) : needsConfiguration ? (
-    <Popover>
-      <PopoverTrigger asChild>
+    isMobile ? (
+      <>
         <Button
           variant="outline"
-          size="sm"
+          size="default"
           className="bg-transparent"
           type="button"
+          onClick={() => setConfigSheetOpen(true)}
         >
           Add
           <Plus className="size-4" />
         </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-80">
-        <ClientToolkitConfigure
-          toolkit={toolkit}
-          id={id}
-          schema={toolkit.parameters}
-          onAdd={onAddToolkit}
-        />
-      </PopoverContent>
-    </Popover>
+        <Sheet open={configSheetOpen} onOpenChange={setConfigSheetOpen}>
+          <SheetContent side="bottom" className="h-[80vh] p-0 flex flex-col">
+            <SheetHeader className="p-4 border-b flex-shrink-0">
+              <SheetTitle>Configure {toolkit.name}</SheetTitle>
+              <SheetDescription>
+                Set up this toolkit before adding it to your chat
+              </SheetDescription>
+            </SheetHeader>
+            <div className="flex-1 overflow-y-auto p-4">
+              <ClientToolkitConfigure
+                toolkit={toolkit}
+                id={id}
+                schema={toolkit.parameters}
+                onAdd={handleConfigurationComplete}
+              />
+            </div>
+          </SheetContent>
+        </Sheet>
+      </>
+    ) : (
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            size="sm"
+            className="bg-transparent"
+            type="button"
+          >
+            Add
+            <Plus className="size-4" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-80">
+          <ClientToolkitConfigure
+            toolkit={toolkit}
+            id={id}
+            schema={toolkit.parameters}
+            onAdd={onAddToolkit}
+          />
+        </PopoverContent>
+      </Popover>
+    )
   ) : (
     <Button
       variant="outline"
-      size="sm"
+      size={isMobile ? "default" : "sm"}
       onClick={() => onAddToolkit({ id, toolkit, parameters: {} })}
       className="bg-transparent"
       type="button"
@@ -153,15 +207,26 @@ const ToolkitItem = ({
   );
 
   return (
-    <div key={id} className="border-border/50 border-b p-2 last:border-b-0">
-      <div className="flex items-center justify-between gap-4">
+    <div key={id} className={cn(
+      "border-border/50 border-b last:border-b-0",
+      isMobile ? "p-4" : "p-2"
+    )}>
+      <div className={cn(
+        "flex items-start justify-between",
+        isMobile ? "gap-4" : "gap-4"
+      )}>
         <div className="flex flex-1 flex-col">
-          <HStack>
-            <toolkit.icon className="size-4" />
-            <h3 className="text-sm font-medium">{toolkit.name}</h3>
+          <HStack className={cn(isMobile && "mb-2")}>
+            <toolkit.icon className={cn(isMobile ? "size-5" : "size-4")} />
+            <h3 className={cn("font-medium", isMobile ? "text-base" : "text-sm")}>
+              {toolkit.name}
+            </h3>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Info className="text-muted-foreground size-3 cursor-pointer" />
+                <Info className={cn(
+                  "text-muted-foreground cursor-pointer", 
+                  isMobile ? "size-4" : "size-3"
+                )} />
               </TooltipTrigger>
               <TooltipContent side="right" className="max-w-64">
                 <div className="space-y-2">
@@ -178,10 +243,18 @@ const ToolkitItem = ({
               </TooltipContent>
             </Tooltip>
           </HStack>
-          <p className="text-muted-foreground text-xs">{toolkit.description}</p>
+          <p className={cn(
+            "text-muted-foreground", 
+            isMobile ? "text-sm" : "text-xs"
+          )}>
+            {toolkit.description}
+          </p>
         </div>
 
-        <div className="flex w-28 justify-end gap-2">
+        <div className={cn(
+          "flex justify-end gap-2",
+          isMobile ? "w-auto" : "w-28"
+        )}>
           {toolkit.addToolkitWrapper ? (
             <toolkit.addToolkitWrapper>
               {addToolkitButtons}
