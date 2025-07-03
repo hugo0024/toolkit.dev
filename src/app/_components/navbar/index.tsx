@@ -17,7 +17,7 @@ export const Navbar = async () => {
       <HStack>
         <Logo className="size-6" />
         <h1 className="overflow-hidden text-lg font-bold whitespace-nowrap">
-          Toolkit.dev
+          K-Chat.ai
         </h1>
       </HStack>
       <HStack>

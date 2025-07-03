@@ -107,7 +107,7 @@ export const ChatContent = ({
                 >
                   {workbench
                     ? `${workbench.name} Workbench`
-                    : "Welcome to Toolkit.dev"}
+                    : "Welcome to K-Chat.ai"}
                 </motion.h1>
               </motion.div>
             )}
