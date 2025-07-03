@@ -1,11 +1,13 @@
-import { memo } from "react";
+import { memo, useState, useEffect } from "react";
 
 import {
   SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,10 +26,13 @@ import {
   Share,
   Trash,
   GitBranch,
+  Loader2,
 } from "lucide-react";
 import { useUpdateChatVisibility } from "@/app/_hooks/use-chat-visibility";
 
 import type { Chat } from "@prisma/client";
+import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const PureChatItem = ({
   chat,
@@ -41,21 +46,88 @@ const PureChatItem = ({
   setOpenMobile: (open: boolean) => void;
 }) => {
   const updateChatVisibility = useUpdateChatVisibility();
+  const router = useRouter();
+  const pathname = usePathname();
+  const isMobile = useIsMobile();
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [targetPath, setTargetPath] = useState<string | null>(null);
+
+  const targetHref = `${
+    chat.workbenchId ? `/workbench/${chat.workbenchId}` : ""
+  }/${chat.id}`;
+
+  // Reset loading state when navigation is complete
+  useEffect(() => {
+    if (isNavigating && targetPath && pathname === targetPath) {
+      setIsNavigating(false);
+      setTargetPath(null);
+    }
+  }, [pathname, targetPath, isNavigating]);
+
+  const handleNavigation = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    if (isMobile) {
+      // On mobile: Close sidebar first, then start loading state
+      setOpenMobile(false);
+      
+      // Small delay to let sidebar closing animation start smoothly
+      setTimeout(async () => {
+        setIsNavigating(true);
+        setTargetPath(targetHref);
+        try {
+          await router.push(targetHref);
+        } catch (error) {
+          console.error('Navigation error:', error);
+          setIsNavigating(false);
+          setTargetPath(null);
+        }
+      }, 100);
+    } else {
+      // On desktop: Normal flow
+      setIsNavigating(true);
+      setTargetPath(targetHref);
+      
+      try {
+        await router.push(targetHref);
+      } catch (error) {
+        console.error('Navigation error:', error);
+        setIsNavigating(false);
+        setTargetPath(null);
+      }
+    }
+  };
 
   return (
     <SidebarMenuItem>
-      <SidebarMenuButton asChild isActive={isActive}>
+      <SidebarMenuButton 
+        asChild 
+        isActive={isActive}
+        className={cn(
+          "transition-opacity duration-200",
+          isNavigating && "opacity-60"
+        )}
+      >
         <Link
-          href={`${
-            chat.workbenchId ? `/workbench/${chat.workbenchId}` : ""
-          }/${chat.id}`}
-          onClick={() => setOpenMobile(false)}
+          href={targetHref}
+          onClick={handleNavigation}
+          className={cn(
+            "cursor-pointer transition-all duration-200",
+            isNavigating && "pointer-events-none"
+          )}
         >
           <div className="flex min-w-0 items-center gap-2">
-            {chat.parentChatId && (
+            {isNavigating ? (
+              <Loader2 className="size-3 shrink-0 animate-spin text-muted-foreground" />
+            ) : chat.parentChatId ? (
               <GitBranch className="text-muted-foreground size-3 shrink-0" />
-            )}
-            <span className="truncate">{chat.title}</span>
+            ) : null}
+            <span className={cn(
+              "truncate transition-opacity duration-200",
+              isNavigating && "opacity-70"
+            )}>
+              {chat.title}
+            </span>
           </div>
         </Link>
       </SidebarMenuButton>
@@ -65,6 +137,7 @@ const PureChatItem = ({
           <SidebarMenuAction
             className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground mr-0.5"
             showOnHover={!isActive}
+            disabled={isNavigating}
           >
             <MoreHorizontal />
             <span className="sr-only">More</span>

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Anvil, ChevronsUpDown, Plus } from "lucide-react";
+import { Anvil, ChevronsUpDown, Plus, Loader2 } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -19,18 +19,22 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { api } from "@/trpc/react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ToolkitIcons } from "@/components/toolkit/toolkit-icons";
 import type { Toolkits } from "@/toolkits/toolkits/shared";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { HStack } from "@/components/ui/stack";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function WorkbenchSelect() {
-  const { isMobile, open } = useSidebar();
-
+  const { isMobile, open, setOpenMobile } = useSidebar();
+  const router = useRouter();
   const pathname = usePathname();
+  const isMobileDevice = useIsMobile();
+  const [navigatingTo, setNavigatingTo] = React.useState<string | null>(null);
+  const [targetPath, setTargetPath] = React.useState<string | null>(null);
 
   const workbenchId = pathname.split("/")[2];
 
@@ -52,6 +56,46 @@ export function WorkbenchSelect() {
   const workbench = workbenches.pages[0]?.items.find(
     (workbench) => workbench.id === workbenchId,
   );
+
+  // Reset loading state when navigation is complete
+  React.useEffect(() => {
+    if (navigatingTo && targetPath && pathname === targetPath) {
+      setNavigatingTo(null);
+      setTargetPath(null);
+    }
+  }, [pathname, targetPath, navigatingTo]);
+
+  const handleWorkbenchNavigation = async (href: string, workbenchName: string) => {
+    if (isMobileDevice) {
+      // On mobile: Close sidebar first, then start loading state
+      setOpenMobile(false);
+      
+      // Small delay to let sidebar closing animation start smoothly
+      setTimeout(async () => {
+        setNavigatingTo(workbenchName);
+        setTargetPath(href);
+        try {
+          await router.push(href);
+        } catch (error) {
+          console.error('Navigation error:', error);
+          setNavigatingTo(null);
+          setTargetPath(null);
+        }
+      }, 100);
+    } else {
+      // On desktop: Normal flow
+      setNavigatingTo(workbenchName);
+      setTargetPath(href);
+      
+      try {
+        await router.push(href);
+      } catch (error) {
+        console.error('Navigation error:', error);
+        setNavigatingTo(null);
+        setTargetPath(null);
+      }
+    }
+  };
 
   return (
     <SidebarGroup className="p-0">
@@ -97,34 +141,58 @@ export function WorkbenchSelect() {
                 Workbenches
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="gap-2 p-2" asChild>
-                <Link href="/">
-                  <span className="truncate font-medium">
+              <DropdownMenuItem 
+                className={cn(
+                  "gap-2 p-2 cursor-pointer transition-opacity duration-200",
+                  navigatingTo === "Default Workbench" && "opacity-60"
+                )} 
+                onSelect={(e) => {
+                  e.preventDefault();
+                  handleWorkbenchNavigation("/", "Default Workbench");
+                }}
+              >
+                <div className="flex items-center gap-2 w-full">
+                  {navigatingTo === "Default Workbench" && (
+                    <Loader2 className="size-3 animate-spin text-muted-foreground" />
+                  )}
+                  <span className={cn(
+                    "truncate font-medium transition-opacity duration-200",
+                    navigatingTo === "Default Workbench" && "opacity-70"
+                  )}>
                     Default Workbench
                   </span>
-                </Link>
+                </div>
               </DropdownMenuItem>
               {workbenches.pages
                 .flatMap((page) => page.items)
                 .map((workbench) => (
                   <DropdownMenuItem
                     key={workbench.id}
-                    className="justify-between gap-2 p-2"
-                    asChild
+                    className={cn(
+                      "justify-between gap-2 p-2 cursor-pointer transition-opacity duration-200",
+                      navigatingTo === workbench.name && "opacity-60"
+                    )}
+                    onSelect={(e) => {
+                      e.preventDefault();
+                      handleWorkbenchNavigation(`/workbench/${workbench.id}`, workbench.name);
+                    }}
                   >
-                    <Link
-                      href={`/workbench/${workbench.id}`}
-                      key={workbench.id}
-                    >
-                      <span className="truncate font-medium">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      {navigatingTo === workbench.name && (
+                        <Loader2 className="size-3 animate-spin text-muted-foreground" />
+                      )}
+                      <span className={cn(
+                        "truncate font-medium transition-opacity duration-200",
+                        navigatingTo === workbench.name && "opacity-70"
+                      )}>
                         {workbench.name}
                       </span>
-                      <ToolkitIcons
-                        toolkits={workbench.toolkitIds as Toolkits[]}
-                        iconClassName="size-3"
-                        iconContainerClassName="p-1"
-                      />
-                    </Link>
+                    </div>
+                    <ToolkitIcons
+                      toolkits={workbench.toolkitIds as Toolkits[]}
+                      iconClassName="size-3"
+                      iconContainerClassName="p-1"
+                    />
                   </DropdownMenuItem>
                 ))}
               {hasNextPage && (
@@ -140,14 +208,30 @@ export function WorkbenchSelect() {
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
-              <Link href="/workbench/new">
-                <DropdownMenuItem className="gap-2 p-2">
-                  <Plus className="size-4" />
-                  <div className="text-muted-foreground font-medium">
+              <DropdownMenuItem 
+                className={cn(
+                  "gap-2 p-2 cursor-pointer transition-opacity duration-200",
+                  navigatingTo === "New Workbench" && "opacity-60"
+                )}
+                onSelect={(e) => {
+                  e.preventDefault();
+                  handleWorkbenchNavigation("/workbench/new", "New Workbench");
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  {navigatingTo === "New Workbench" ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Plus className="size-4" />
+                  )}
+                  <div className={cn(
+                    "text-muted-foreground font-medium transition-opacity duration-200",
+                    navigatingTo === "New Workbench" && "opacity-70"
+                  )}>
                     New Workbench
                   </div>
-                </DropdownMenuItem>
-              </Link>
+                </div>
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </SidebarMenuItem>
