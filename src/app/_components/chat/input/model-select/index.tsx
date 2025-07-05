@@ -109,7 +109,7 @@ export const ModelSelect: React.FC = () => {
   const ModelList = useMemo(() => (
     <div className={cn(
       "w-full overflow-x-hidden overflow-y-auto",
-      isMobile ? "flex-1 min-h-0" : "max-h-32 md:max-h-48"
+      isMobile ? "flex-1 min-h-0" : "max-h-[40vh] min-h-[200px]"
     )}>
       {models?.map((model) => (
         <div
