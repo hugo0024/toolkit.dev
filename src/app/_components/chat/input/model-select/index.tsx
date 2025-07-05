@@ -8,10 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import { ModelProviderIcon } from "@/components/ui/model-icon";
 import { Input } from "@/components/ui/input";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Sheet,
   SheetContent,
@@ -109,7 +109,7 @@ export const ModelSelect: React.FC = () => {
   const ModelList = useMemo(() => (
     <div className={cn(
       "w-full overflow-x-hidden overflow-y-auto",
-      isMobile ? "flex-1 min-h-0" : "max-h-32 md:max-h-48"
+      isMobile ? "flex-1 min-h-0" : ""
     )}>
       {models?.map((model) => (
         <div
@@ -358,22 +358,24 @@ export const ModelSelect: React.FC = () => {
 
   return (
     <>
-      <DropdownMenu open={isOpen} onOpenChange={isOpen ? setIsOpen : undefined}>
-        <DropdownMenuTrigger asChild>
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <PopoverTrigger asChild>
           {TriggerButton}
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          className="w-xs overflow-hidden p-0 md:w-lg"
+        </PopoverTrigger>
+        <PopoverContent
+          className="w-[400px] overflow-hidden p-0 max-h-[500px] flex flex-col"
           align="start"
           sideOffset={8}
         >
-          <div className="bg-background sticky top-0 z-10 border-b">
-            <h2 className="mb-2 p-2 text-sm font-bold">Model Selector</h2>
+          <div className="bg-background sticky top-0 z-10 border-b flex-shrink-0">
+            <h2 className="mb-2 p-2 text-sm font-bold">Select Model</h2>
             {FilterSection}
           </div>
-          {ModelList}
-        </DropdownMenuContent>
-      </DropdownMenu>
+          <div className="flex-1 overflow-y-auto min-h-0">
+            {ModelList}
+          </div>
+        </PopoverContent>
+      </Popover>
     </>
   );
 };
