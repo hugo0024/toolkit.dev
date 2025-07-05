@@ -367,7 +367,7 @@ const PureMultimodalInput: React.FC<Props> = ({
     <div className="relative flex w-full flex-col">
       <input
         type="file"
-        className="pointer-events-none fixed -top-4 -left-4 size-0.5"
+        className="pointer-events-none absolute opacity-0 sr-only"
         ref={fileInputRef}
         multiple
         accept={acceptedFileTypes.join(",")}
