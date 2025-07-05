@@ -20,35 +20,25 @@ export const HeroSection: React.FC = () => {
             className="flex h-full flex-col items-center justify-center gap-6 md:items-end"
           >
             <VStack className="items-center md:items-end">
-              <Badge variant="primary" className="text-lg">
+              {/* <Badge variant="primary" className="text-lg">
                 T3 Cloneathon Project
-              </Badge>
+              </Badge> */}
               <h1 className="from-foreground to-foreground/80 bg-gradient-to-r bg-clip-text text-center text-4xl leading-tight font-bold text-transparent md:text-right md:text-6xl">
-                Open Source
+                All In One
                 <br />
                 <span className="from-primary to-primary/70 bg-gradient-to-r bg-clip-text text-center text-transparent md:text-right">
-                  Generative UI Chatbot
+                  Generative AI Platform
                 </span>
               </h1>
             </VStack>
 
             <p className="text-muted-foreground max-w-lg text-center text-lg leading-relaxed md:text-right md:text-xl">
-              Configure a custom chatbot with content-rich, togglable toolkits.
-              100% type-safe communication between server tools and client
-              rendering.
+              Access multiple AI models from leading providers in one unified interface. 
+              Chat with Claude, GPT, Gemini, and more—all enhanced with powerful 
+              toolkits for any task.
             </p>
 
             <div className="flex flex-col-reverse gap-4 sm:flex-row">
-              <Button
-                variant="outline"
-                size="lg"
-                className="text-base font-semibold"
-              >
-                <span className="flex items-center gap-2">
-                  <SiGithub />
-                  Contribute
-                </span>
-              </Button>
               <AuthModal>
                 <Button
                   size="lg"

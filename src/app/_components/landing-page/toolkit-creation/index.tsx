@@ -3,9 +3,9 @@
 import React from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
-import { Code, type LucideIcon } from "lucide-react";
+import { ArrowRight, type LucideIcon } from "lucide-react";
 import { CardTitle } from "@/components/ui/card";
-import { CodeBlock } from "@/components/ui/code-block";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { HStack, VStack } from "@/components/ui/stack";
 import { toolkitCreationSteps } from "./data";
 import { Button } from "@/components/ui/button";
@@ -25,23 +25,22 @@ export const ToolkitCreationSection: React.FC = () => {
           className="mb-16 text-center"
         >
           <h2 className="mb-4 text-3xl font-bold md:text-4xl">
-            Create Custom Toolkits
-            <span className="text-primary block">In Minutes, Not Hours</span>
+            Customize Your AI Experience
+            <span className="text-primary block">Simple. Powerful. Personal.</span>
           </h2>
           <p className="text-muted-foreground mx-auto mb-4 max-w-2xl text-lg">
-            Building new AI capabilities is as simple as defining your tools.
-            Configure server tools and client tools, and it automatically works
-            with the entire system.
+            Add the tools you need, when you need them. From business analytics to creative projects, 
+            customize your AI assistant to work exactly how you want.
           </p>
-          <Link href="https://github.com/jasonhedman/toolkit.dev/tree/main/src/toolkits">
+          <Link href="/login">
             <Button className="user-message">
-              <Code className="size-4" />
-              Start Building
+              <ArrowRight className="size-4" />
+              Get Started Free
             </Button>
           </Link>
         </motion.div>
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {toolkitCreationSteps.map((step, index) => (
             <StepCard key={index} {...step} />
           ))}
@@ -55,35 +54,37 @@ const StepCard: React.FC<{
   icon: LucideIcon;
   title: string;
   description: string;
-  code: string;
-  codeTitle: string;
+  features: string[];
+  highlight: string;
   delay: number;
-}> = ({ icon: Icon, title, description, code, codeTitle, delay }) => (
+}> = ({ icon: Icon, title, description, features, highlight, delay }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     whileInView={{ opacity: 1, y: 0 }}
     transition={{ delay, duration: 0.5 }}
     viewport={{ once: true }}
   >
-    <VStack className="h-full items-start gap-4">
-      <HStack className="gap-4">
-        <div className="bg-primary/40 rounded-lg p-2">
-          {<Icon className="size-6" />}
+    <Card className="h-full">
+      <CardHeader>
+        <div className="bg-primary/10 rounded-lg p-3 w-fit">
+          <Icon className="size-8 text-primary" />
         </div>
-        <div>
-          <CardTitle className="text-lg">{title}</CardTitle>
-          <p className="text-muted-foreground text-sm">{description}</p>
+        <CardTitle className="text-xl">{title}</CardTitle>
+        <CardDescription className="text-base">{description}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ul className="space-y-2 mb-4">
+          {features.map((feature, idx) => (
+            <li key={idx} className="flex items-start gap-2">
+              <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0"></div>
+              <span className="text-sm text-muted-foreground">{feature}</span>
+            </li>
+          ))}
+        </ul>
+        <div className="bg-primary/5 rounded-lg p-3">
+          <p className="text-sm font-medium text-primary">{highlight}</p>
         </div>
-      </HStack>
-      <CodeBlock
-        language="typescript"
-        value={code}
-        heading={codeTitle}
-        showLineNumbers={false}
-        allowCopy={false}
-        headerClassName="bg-primary/20 dark:bg-primary/20 py-2"
-        headingClassName="text-base font-bold"
-      />
-    </VStack>
+      </CardContent>
+    </Card>
   </motion.div>
 );

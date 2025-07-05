@@ -33,11 +33,41 @@ export const WorkbenchVisualization: React.FC<{
     centerColorClasses[workbench.color as keyof typeof centerColorClasses];
 
   return (
-    <div className="relative w-full overflow-hidden" ref={containerRef}>
+    <div className="relative w-full overflow-hidden px-2 sm:px-4" ref={containerRef}>
+      {/* Animated Beams connecting toolkits to center - positioned behind cards */}
+      <div className="absolute inset-0 z-0">
+        {toolkitRefs.map((ref, index) => (
+          <AnimatedBeam
+            key={index}
+            containerRef={containerRef}
+            fromRef={ref}
+            toRef={centerRef}
+            duration={3 + Math.random()}
+            delay={index * 0.3}
+            pathOpacity={0.4}
+            reverse={index < 2}
+            gradientStartColor={
+              workbench.color === "blue"
+                ? "#3b82f6"
+                : workbench.color === "green"
+                  ? "#10b981"
+                  : "#8b5cf6"
+            }
+            gradientStopColor={
+              workbench.color === "blue"
+                ? "#1d4ed8"
+                : workbench.color === "green"
+                  ? "#059669"
+                  : "#7c3aed"
+            }
+          />
+        ))}
+      </div>
+
       {/* Central Workbench Node */}
-      <div className="flex h-full w-full items-center justify-between gap-2 md:gap-8">
+      <div className="relative z-10 flex h-full w-full items-center justify-center gap-2 sm:gap-4 md:gap-6 lg:gap-8">
         {/* Left side toolkits */}
-        <div className="z-8 flex flex-col gap-4">
+        <div className="flex flex-col gap-2 sm:gap-3 md:gap-4 min-w-0 flex-shrink">
           {workbench.toolkits.slice(0, 2).map((toolkit, index) => (
             <div key={toolkit}>
               <ToolkitNode
@@ -50,7 +80,7 @@ export const WorkbenchVisualization: React.FC<{
         </div>
 
         {/* Center node */}
-        <div className="z-10">
+        <div className="flex-shrink-0">
           <div
             ref={centerRef}
             className={`rounded-xl border-2 ${centerColors.border} ${centerColors.bg} p-2 shadow-lg md:p-4`}
@@ -60,7 +90,7 @@ export const WorkbenchVisualization: React.FC<{
         </div>
 
         {/* Right side toolkits */}
-        <div className="z-8 flex flex-col gap-4">
+        <div className="flex flex-col gap-2 sm:gap-3 md:gap-4 min-w-0 flex-shrink">
           {workbench.toolkits.slice(2, 4).map((toolkit, index) => (
             <div key={toolkit}>
               <ToolkitNode
@@ -74,34 +104,6 @@ export const WorkbenchVisualization: React.FC<{
           ))}
         </div>
       </div>
-
-      {/* Animated Beams connecting toolkits to center */}
-      {toolkitRefs.map((ref, index) => (
-        <AnimatedBeam
-          key={index}
-          containerRef={containerRef}
-          fromRef={ref}
-          toRef={centerRef}
-          duration={3 + Math.random()}
-          delay={index * 0.3}
-          pathOpacity={0.4}
-          reverse={index < 2}
-          gradientStartColor={
-            workbench.color === "blue"
-              ? "#3b82f6"
-              : workbench.color === "green"
-                ? "#10b981"
-                : "#8b5cf6"
-          }
-          gradientStopColor={
-            workbench.color === "blue"
-              ? "#1d4ed8"
-              : workbench.color === "green"
-                ? "#059669"
-                : "#7c3aed"
-          }
-        />
-      ))}
     </div>
   );
 };
@@ -140,13 +142,13 @@ const ToolkitNode: React.FC<{
   return (
     <div
       ref={nodeRef}
-      className={`relative rounded-lg border-2 ${colors.border} ${colors.bg} p-2 shadow-sm transition-all hover:shadow-md`}
+      className={`relative rounded-lg border-2 ${colors.border} ${colors.bg} p-1.5 sm:p-2 shadow-sm transition-all hover:shadow-md max-w-[120px] sm:max-w-[140px] md:max-w-none`}
     >
-      <div className="flex flex-col items-center gap-2 md:flex-row">
-        <div className={`rounded-md ${colors.iconBg} p-0 md:p-1.5`}>
-          <IconComponent className={`size-4 ${colors.iconColor}`} />
+      <div className="flex flex-col items-center gap-1 sm:gap-2 md:flex-row">
+        <div className={`rounded-md ${colors.iconBg} p-0 md:p-1.5 flex-shrink-0`}>
+          <IconComponent className={`size-3 sm:size-4 ${colors.iconColor}`} />
         </div>
-        <span className="text-xs font-medium md:whitespace-nowrap">
+        <span className="text-xs font-medium text-center md:text-left md:whitespace-nowrap truncate">
           {clientToolkit.name}
         </span>
       </div>

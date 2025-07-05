@@ -24,10 +24,10 @@ export const AuthModal = ({ children }: AuthModalProps) => {
           <Logo className="size-16" />
           <VStack>
             <DialogTitle className="text-primary text-xl">
-              Sign in to Toolkit
+              Sign in to K-Chat.ai
             </DialogTitle>
             <DialogDescription className="hidden">
-              Sign in to your account to get started with Toolkit.
+              Sign in to your account to get started with K-Chat.ai.
             </DialogDescription>
           </VStack>
         </DialogHeader>

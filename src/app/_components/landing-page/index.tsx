@@ -10,9 +10,9 @@ export const LandingPage: React.FC = () => {
     <div className="h-fit min-h-screen">
       <Navbar />
       <HeroSection />
-      <DependenciesSection />
       <ToolkitCreationSection />
       <WorkbenchSection />
+      <DependenciesSection />
     </div>
   );
 };
