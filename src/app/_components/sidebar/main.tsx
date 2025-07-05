@@ -37,7 +37,7 @@ export const NavMain = () => {
     }
   }, [pathname, targetPath, isNavigating]);
 
-  const handleNewChatNavigation = async (e: React.MouseEvent) => {
+  const handleNewChatNavigation = (e: React.MouseEvent) => {
     e.preventDefault();
     
     if (isMobile) {
@@ -45,11 +45,11 @@ export const NavMain = () => {
       setOpenMobile(false);
       
       // Small delay to let sidebar closing animation start smoothly
-      setTimeout(async () => {
+      setTimeout(() => {
         setIsNavigating(true);
         setTargetPath(targetHref);
         try {
-          await router.push(targetHref);
+          router.push(targetHref);
         } catch (error) {
           console.error('Navigation error:', error);
           setIsNavigating(false);
@@ -62,7 +62,7 @@ export const NavMain = () => {
       setTargetPath(targetHref);
       
       try {
-        await router.push(targetHref);
+        router.push(targetHref);
       } catch (error) {
         console.error('Navigation error:', error);
         setIsNavigating(false);

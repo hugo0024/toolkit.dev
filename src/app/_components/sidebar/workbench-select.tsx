@@ -22,7 +22,7 @@ import { api } from "@/trpc/react";
 import { usePathname, useRouter } from "next/navigation";
 import { ToolkitIcons } from "@/components/toolkit/toolkit-icons";
 import type { Toolkits } from "@/toolkits/toolkits/shared";
-import Link from "next/link";
+
 import { Button } from "@/components/ui/button";
 import { HStack } from "@/components/ui/stack";
 import { cn } from "@/lib/utils";
@@ -65,17 +65,17 @@ export function WorkbenchSelect() {
     }
   }, [pathname, targetPath, navigatingTo]);
 
-  const handleWorkbenchNavigation = async (href: string, workbenchName: string) => {
+  const handleWorkbenchNavigation = (href: string, workbenchName: string) => {
     if (isMobileDevice) {
       // On mobile: Close sidebar first, then start loading state
       setOpenMobile(false);
       
       // Small delay to let sidebar closing animation start smoothly
-      setTimeout(async () => {
+      setTimeout(() => {
         setNavigatingTo(workbenchName);
         setTargetPath(href);
         try {
-          await router.push(href);
+          router.push(href);
         } catch (error) {
           console.error('Navigation error:', error);
           setNavigatingTo(null);
@@ -88,7 +88,7 @@ export function WorkbenchSelect() {
       setTargetPath(href);
       
       try {
-        await router.push(href);
+        router.push(href);
       } catch (error) {
         console.error('Navigation error:', error);
         setNavigatingTo(null);
@@ -200,7 +200,7 @@ export function WorkbenchSelect() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => fetchNextPage()}
+                    onClick={() => void fetchNextPage()}
                     disabled={isFetchingNextPage}
                   >
                     {isFetchingNextPage ? "Loading..." : "Load more"}

@@ -4,7 +4,6 @@ import {
   SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
@@ -64,7 +63,7 @@ const PureChatItem = ({
     }
   }, [pathname, targetPath, isNavigating]);
 
-  const handleNavigation = async (e: React.MouseEvent) => {
+  const handleNavigation = (e: React.MouseEvent) => {
     e.preventDefault();
     
     if (isMobile) {
@@ -72,11 +71,11 @@ const PureChatItem = ({
       setOpenMobile(false);
       
       // Small delay to let sidebar closing animation start smoothly
-      setTimeout(async () => {
+      setTimeout(() => {
         setIsNavigating(true);
         setTargetPath(targetHref);
         try {
-          await router.push(targetHref);
+          router.push(targetHref);
         } catch (error) {
           console.error('Navigation error:', error);
           setIsNavigating(false);
@@ -89,7 +88,7 @@ const PureChatItem = ({
       setTargetPath(targetHref);
       
       try {
-        await router.push(targetHref);
+        router.push(targetHref);
       } catch (error) {
         console.error('Navigation error:', error);
         setIsNavigating(false);
