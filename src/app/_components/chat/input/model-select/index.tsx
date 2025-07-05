@@ -8,10 +8,13 @@ import { Badge } from "@/components/ui/badge";
 import { ModelProviderIcon } from "@/components/ui/model-icon";
 import { Input } from "@/components/ui/input";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   Sheet,
   SheetContent,
@@ -109,56 +112,74 @@ export const ModelSelect: React.FC = () => {
   const ModelList = useMemo(() => (
     <div className={cn(
       "w-full overflow-x-hidden overflow-y-auto",
-      isMobile ? "flex-1 min-h-0" : "max-h-[40vh] min-h-[200px]"
+      isMobile ? "flex-1 min-h-0" : "h-0 flex-1"
     )}>
-      {models?.map((model) => (
-        <div
-          key={model.modelId}
-          className={cn(
-            "hover:bg-accent/50 flex w-full max-w-full cursor-pointer items-start gap-3 rounded-md p-3 transition-colors",
-            isMobile ? "border-b last:border-b-0" : "",
-            selectedChatModel?.modelId === model.modelId && "bg-accent",
-          )}
-          onClick={() => handleModelSelect(model)}
-        >
-          <ModelProviderIcon
-            provider={model.provider}
-            className="size-5 flex-shrink-0 mt-0.5"
-          />
-          <div className="flex-1 min-w-0 space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium truncate">
-                {model.name}
-              </span>
-              {model.isNew && (
-                <Badge variant="secondary" className="h-5 text-xs">
-                  New
-                </Badge>
+      <div className={cn(
+        isMobile ? "space-y-0" : "grid grid-cols-1 gap-2 p-2"
+      )}>
+        {models?.map((model) => (
+          <div
+            key={model.modelId}
+                          className={cn(
+                "group relative cursor-pointer transition-all duration-200",
+                isMobile 
+                  ? "border-b border-border/50 last:border-b-0 p-3 hover:bg-accent/50"
+                  : "rounded-lg border border-border/50 p-3 hover:border-primary/20 hover:bg-accent/30 hover:shadow-sm",
+                selectedChatModel?.modelId === model.modelId && 
+                  (isMobile ? "bg-accent" : "bg-primary/5 border-primary/30 shadow-sm"),
               )}
-            </div>
-            {model.capabilities && model.capabilities.length > 0 && (
-              <div className="flex flex-wrap gap-1">
-                {model.capabilities.map((capability) => {
-                  const Icon = capabilityIcons[capability];
-                  return (
-                    <Badge
-                      key={capability}
-                      variant="capability"
-                      className={cn(
-                        "h-5 gap-1 px-1.5 text-xs",
-                        capabilityColors[capability]
-                      )}
-                    >
-                      {Icon && <Icon className="size-3" />}
-                      {isMobile && <span>{capabilityLabels[capability]}</span>}
-                    </Badge>
-                  );
-                })}
+            onClick={() => handleModelSelect(model)}
+          >
+            <div className="flex items-center gap-3">
+              <div className={cn(
+                "rounded-lg p-2 transition-colors",
+                selectedChatModel?.modelId === model.modelId
+                  ? "bg-primary/10"
+                  : "bg-muted/50 group-hover:bg-muted"
+              )}>
+                <ModelProviderIcon
+                  provider={model.provider}
+                  className="size-4 flex-shrink-0"
+                />
               </div>
-            )}
+              
+              <div className="flex-1 min-w-0 space-y-2">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-medium text-sm truncate">
+                    {model.name}
+                  </h3>
+                  {model.isNew && (
+                    <Badge variant="secondary" className="h-4 text-xs font-medium">
+                      New
+                    </Badge>
+                  )}
+                </div>
+                
+                {model.capabilities && model.capabilities.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {model.capabilities.map((capability) => {
+                      const Icon = capabilityIcons[capability];
+                      return (
+                        <Badge
+                          key={capability}
+                          variant="capability"
+                          className={cn(
+                            "h-5 gap-1 px-1.5 text-xs font-medium",
+                            capabilityColors[capability]
+                          )}
+                        >
+                          {Icon && <Icon className="size-3" />}
+                          <span>{capabilityLabels[capability]}</span>
+                        </Badge>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   ), [models, isMobile, selectedChatModel, handleModelSelect]);
 
@@ -358,22 +379,21 @@ export const ModelSelect: React.FC = () => {
 
   return (
     <>
-      <DropdownMenu open={isOpen} onOpenChange={isOpen ? setIsOpen : undefined}>
-        <DropdownMenuTrigger asChild>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogTrigger asChild>
           {TriggerButton}
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          className="w-xs overflow-hidden p-0 md:w-lg"
-          align="start"
-          sideOffset={8}
-        >
-          <div className="bg-background sticky top-0 z-10 border-b">
-            <h2 className="mb-2 p-2 text-sm font-bold">Model Selector</h2>
+        </DialogTrigger>
+        <DialogContent className="flex max-h-[80vh] w-full max-w-2xl flex-col gap-4 overflow-hidden">
+          <DialogHeader className="gap-0">
+            <DialogTitle className="text-xl">Model Selector</DialogTitle>
+
+          </DialogHeader>
+          <div className="flex-shrink-0">
             {FilterSection}
           </div>
           {ModelList}
-        </DropdownMenuContent>
-      </DropdownMenu>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
