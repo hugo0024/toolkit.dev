@@ -52,7 +52,7 @@ interface ChatContextType {
       | Array<Attachment>
       | ((prev: Array<Attachment>) => Array<Attachment>),
   ) => void;
-  selectedChatModel: LanguageModel | undefined;
+  selectedChatModel: LanguageModel;
   setSelectedChatModel: (model: LanguageModel) => void;
   useNativeSearch: boolean;
   setUseNativeSearch: (enabled: boolean) => void;
