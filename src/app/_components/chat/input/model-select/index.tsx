@@ -1,6 +1,6 @@
 "use client";
 
-import { X, Search, ChevronDown, ChevronUp } from "lucide-react";
+import { X, Search, ChevronDown, ChevronUp, Sparkles } from "lucide-react";
 import { useState, useCallback, useMemo } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -99,8 +99,11 @@ export const ModelSelect: React.FC = () => {
         </>
       ) : (
         <>
-          <X className="mr-2 size-4" />
-          Select a model
+          <Sparkles className="mr-2 size-4" />
+          <span className="hidden flex-1 truncate text-left md:block">
+            Auto
+          </span>
+          <NativeSearchToggle />
         </>
       )}
     </Button>
@@ -111,6 +114,31 @@ export const ModelSelect: React.FC = () => {
       "w-full overflow-x-hidden overflow-y-auto",
       isMobile ? "flex-1 min-h-0" : "max-h-32 md:max-h-48"
     )}>
+      {/* Auto mode option */}
+      <div
+        className={cn(
+          "hover:bg-accent/50 flex w-full max-w-full cursor-pointer items-start gap-3 rounded-md p-3 transition-colors",
+          isMobile ? "border-b" : "",
+          !selectedChatModel && "bg-accent",
+        )}
+        onClick={() => setSelectedChatModel(undefined)}
+      >
+        <Sparkles className="size-5 flex-shrink-0 mt-0.5" />
+        <div className="flex-1 min-w-0 space-y-2">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium truncate">
+              Auto
+            </span>
+            <Badge variant="secondary" className="h-5 text-xs">
+              Recommended
+            </Badge>
+          </div>
+          <div className="text-xs text-muted-foreground">
+            Uses Gemini 2.5 Pro for optimal performance
+          </div>
+        </div>
+      </div>
+      
       {models?.map((model) => (
         <div
           key={model.modelId}
