@@ -35,6 +35,8 @@ import { clientCookieUtils } from "@/lib/cookies/client";
 
 const DEFAULT_CHAT_MODEL = googleModels.find(
   (model) => model.modelId === "gemini-2.5-pro-preview-06-05",
+) ?? anthropicModels.find(
+  (model) => model.modelId === "claude-3-7-sonnet-latest",
 )!;
 
 interface ChatContextType {
@@ -51,7 +53,7 @@ interface ChatContextType {
       | ((prev: Array<Attachment>) => Array<Attachment>),
   ) => void;
   selectedChatModel: LanguageModel | undefined;
-  setSelectedChatModel: (model: LanguageModel | undefined) => void;
+  setSelectedChatModel: (model: LanguageModel) => void;
   useNativeSearch: boolean;
   setUseNativeSearch: (enabled: boolean) => void;
   imageGenerationModel: ImageModel | undefined;
@@ -99,8 +101,8 @@ export function ChatProvider({
   const utils = api.useUtils();
 
   const [selectedChatModel, setSelectedChatModelState] =
-    useState<LanguageModel | undefined>(
-      initialPreferences?.selectedChatModel,
+    useState<LanguageModel>(
+      initialPreferences?.selectedChatModel ?? DEFAULT_CHAT_MODEL,
     );
   const [useNativeSearch, setUseNativeSearchState] = useState(
     initialPreferences?.useNativeSearch ?? false,
@@ -170,14 +172,9 @@ export function ChatProvider({
   const [hasInvalidated, setHasInvalidated] = useState(false);
 
   // Wrapper functions that also save to cookies
-  const setSelectedChatModel = (model: LanguageModel | undefined) => {
+  const setSelectedChatModel = (model: LanguageModel) => {
     setSelectedChatModelState(model);
-    if (model) {
-      clientCookieUtils.setSelectedChatModel(model);
-    } else {
-      // Clear the saved model when using Auto mode
-      clientCookieUtils.setSelectedChatModel(DEFAULT_CHAT_MODEL);
-    }
+    clientCookieUtils.setSelectedChatModel(model);
   };
 
   const setUseNativeSearch = (enabled: boolean) => {
@@ -222,29 +219,26 @@ export function ChatProvider({
     sendExtraMessageFields: true,
     generateId: generateUUID,
     fetch: fetchWithErrorHandlers,
-    experimental_prepareRequestBody: (body) => {
-      const modelToUse = selectedChatModel ?? DEFAULT_CHAT_MODEL;
-      return {
-        id,
-        message: body.messages.at(-1),
-        selectedChatModel: `${modelToUse.provider}/${modelToUse.modelId}`,
-        imageGenerationModel: imageGenerationModel
-          ? `${imageGenerationModel.provider}:${imageGenerationModel.modelId}`
-          : undefined,
-        selectedVisibilityType: initialVisibilityType,
-        useNativeSearch,
-        systemPrompt: workbench?.systemPrompt,
-        toolkits: modelToUse.capabilities?.includes(
-          LanguageModelCapability.ToolCalling,
-        )
-          ? toolkits.map((t) => ({
+    experimental_prepareRequestBody: (body) => ({
+      id,
+      message: body.messages.at(-1),
+      selectedChatModel: `${selectedChatModel?.provider}/${selectedChatModel?.modelId}`,
+      imageGenerationModel: imageGenerationModel
+        ? `${imageGenerationModel.provider}:${imageGenerationModel.modelId}`
+        : undefined,
+      selectedVisibilityType: initialVisibilityType,
+      useNativeSearch,
+      systemPrompt: workbench?.systemPrompt,
+      toolkits: selectedChatModel?.capabilities?.includes(
+        LanguageModelCapability.ToolCalling,
+      )
+        ? toolkits.map((t) => ({
             id: t.id,
             parameters: t.parameters,
           }))
         : [],
-        workbenchId: workbench?.id,
-      };
-    },
+      workbenchId: workbench?.id,
+    }),
     onFinish: () => {
       void utils.messages.getMessagesForChat.invalidate({ chatId: id });
       if (initialMessages.length === 0 && !hasInvalidated) {
