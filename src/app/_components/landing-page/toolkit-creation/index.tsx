@@ -6,7 +6,6 @@ import { motion } from "motion/react";
 import { ArrowRight, type LucideIcon } from "lucide-react";
 import { CardTitle } from "@/components/ui/card";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
-import { HStack, VStack } from "@/components/ui/stack";
 import { toolkitCreationSteps } from "./data";
 import { Button } from "@/components/ui/button";
 

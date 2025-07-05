@@ -9,8 +9,6 @@ import { useScrollToBottom } from "@/app/_hooks/use-scroll-to-bottom";
 import { useChatContext } from "@/app/_contexts/chat-context";
 
 import { Logo } from "@/components/ui/logo";
-import { useSearchParams } from "next/navigation";
-import { WelcomeDialog } from "../welcome-dialog";
 import { Anvil } from "lucide-react";
 
 export const ChatContent = ({
@@ -22,8 +20,6 @@ export const ChatContent = ({
   isReadonly: boolean;
   hasInitialMessages: boolean;
 }) => {
-  const searchParams = useSearchParams();
-  const welcome = searchParams.get("welcome") === "true";
 
   const {
     containerRef,

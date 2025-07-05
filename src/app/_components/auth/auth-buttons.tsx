@@ -21,7 +21,7 @@ export const AuthButtons = ({ providers, redirect }: AuthButtonsProps) => {
     setLoadingProvider(providerId);
     try {
       await signIn(providerId, { redirectTo: redirect });
-    } catch (error) {
+    } catch {
       // Reset loading state if sign in fails
       setLoadingProvider(null);
     }

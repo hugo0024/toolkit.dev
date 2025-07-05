@@ -2,8 +2,6 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { ToolkitDemoList } from "./toolkit-demo-list";
-import { SiGithub } from "@icons-pack/react-simple-icons";
-import { Badge } from "@/components/ui/badge";
 import { VStack } from "@/components/ui/stack";
 import { MotionContainer } from "./motion-container";
 import { AuthModal } from "../auth-modal";
