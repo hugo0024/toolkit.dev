@@ -24,7 +24,7 @@ export const WorkbenchCard: React.FC<{
       transition={{ delay, duration: 0.5 }}
       viewport={{ once: true }}
     >
-      <Card className="border-border/50 hover:border-primary/20 hover:shadow-l h-full gap-2 p-2 transition-all duration-300">
+      <Card className="border-border/50 hover:border-primary/20 hover:shadow-l h-full gap-2 p-6 transition-all duration-300">
         <CardHeader className="p-0">
           <CardTitle className="flex items-center gap-3 text-lg">
             <div className={`rounded-lg ${cardColors} p-2`}>
@@ -32,21 +32,23 @@ export const WorkbenchCard: React.FC<{
             </div>
             <VStack className="items-start gap-0">
               <h3 className="text-lg font-bold">{workbench.title}</h3>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-muted-foreground text-sm min-h-[2.5rem] flex items-start">
                 {workbench.description}
               </p>
             </VStack>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4 p-0">
+        <CardContent className="p-0 flex flex-col h-full">
           {/* System Prompt Preview */}
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 mb-4">
             <h4 className="text-sm font-medium">System Prompt</h4>
-            <p className="text-muted-foreground border-muted border-l-2 pl-3 text-xs italic">
+            <p className="text-muted-foreground border-muted border-l-2 pl-3 text-xs italic flex items-start">
               &ldquo;{workbench.systemPrompt}&rdquo;
             </p>
           </div>
-          <WorkbenchVisualization workbench={workbench} />
+          <div className="flex-grow flex items-end">
+            <WorkbenchVisualization workbench={workbench} />
+          </div>
         </CardContent>
       </Card>
     </motion.div>
